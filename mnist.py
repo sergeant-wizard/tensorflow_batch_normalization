@@ -44,6 +44,7 @@ def max_pool_2x2(x):
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1,2,2,1], padding='SAME')
 
 def inference(images, hidden1_units, hidden2_units):
+    # FIXME: deprecated documentation
     """Build the MNIST model up to where it may be used for inference.
 
     Args:
@@ -54,6 +55,14 @@ def inference(images, hidden1_units, hidden2_units):
     Returns:
       softmax_linear: Output tensor with the computed logits.
     """
+
+    # first convolutional layer
+    W_conv1 = weight_variable([5, 5, 1, 32])
+    b_conv1 = bias_variable([32])
+
+    x_image = tf.reshape(images, [-1, 28, 28, 1])
+    h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+
     # Hidden 1
     with tf.name_scope('hidden1') as scope:
         weights = tf.Variable(
