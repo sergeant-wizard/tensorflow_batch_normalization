@@ -43,6 +43,13 @@ def conv2d(x, W):
 def max_pool_2x2(x):
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1,2,2,1], padding='SAME')
 
+def batch_normalization(shape, input):
+  eps = 1e-5
+  gamma = weight_variable([shape])
+  beta = weight_variable([shape])
+  mean, variance = tf.nn.moments(input, [0])
+  return gamma * (input - mean) / tf.sqrt(variance + eps) + beta
+
 def inference(images, keep_pl):
     # FIXME: deprecated documentation
     """Build the MNIST model up to where it may be used for inference.
@@ -58,21 +65,21 @@ def inference(images, keep_pl):
 
     with tf.name_scope('first_convolutional_layer') as scope:
       W_conv1 = weight_variable([5, 5, 1, 32])
-      b_conv1 = bias_variable([32])
-      h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
-      h_pool1 = max_pool_2x2(h_conv1)
+      h_conv1 = conv2d(x_image, W_conv1)
+      bn1 = batch_normalization(32, h_conv1)
+      h_pool1 = max_pool_2x2(tf.nn.relu(bn1))
 
     with tf.name_scope('second_convolutional_layer') as scope:
       W_conv2 = weight_variable([5, 5, 32, 64])
-      b_conv2 = bias_variable([64])
-      h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
-      h_pool2 = max_pool_2x2(h_conv2)
+      h_conv2 = conv2d(h_pool1, W_conv2)
+      bn2 = batch_normalization(64, h_conv2)
+      h_pool2 = max_pool_2x2(tf.nn.relu(bn2))
 
     with tf.name_scope('densely_connected_layer') as scope:
       W_fc1 = weight_variable([7*7*64, 1024])
-      b_fc1 = bias_variable([1024])
       h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
-      h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+      bn3 = batch_normalization(1024, tf.matmul(h_pool2_flat, W_fc1))
+      h_fc1 = tf.nn.relu(bn3)
 
     with tf.name_scope('dropout') as scope:
       h_fc1_drop = tf.nn.dropout(h_fc1, keep_pl)
@@ -131,7 +138,7 @@ def training(loss):
     # Add a scalar summary for the snapshot loss.
     tf.scalar_summary(loss.op.name, loss)
     # Create the gradient descent optimizer with the given learning rate.
-    optimizer = tf.train.AdamOptimizer(1e-4)
+    optimizer = tf.train.AdamOptimizer(1e-3)
     # Create a variable to track the global step.
     global_step = tf.Variable(0, name='global_step', trainable=False)
     # Use the optimizer to apply the gradients that minimize the loss
