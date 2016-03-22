@@ -138,7 +138,7 @@ def training(loss):
     # Add a scalar summary for the snapshot loss.
     tf.scalar_summary(loss.op.name, loss)
     # Create the gradient descent optimizer with the given learning rate.
-    optimizer = tf.train.AdamOptimizer(1e-3)
+    optimizer = tf.train.AdamOptimizer(1e-4)
     # Create a variable to track the global step.
     global_step = tf.Variable(0, name='global_step', trainable=False)
     # Use the optimizer to apply the gradients that minimize the loss
