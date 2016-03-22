@@ -23,7 +23,7 @@ import mnist
 # Basic model parameters as external flags.
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_integer('max_steps', 20000, 'Number of steps to run trainer.')
+flags.DEFINE_integer('max_steps', 1000, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 50, 'Batch size.  '
                      'Must divide evenly into the dataset sizes.')
 flags.DEFINE_string('train_dir', 'data', 'Directory to put the training data.')
@@ -188,7 +188,7 @@ def run_training():
         summary_writer.add_summary(summary_str, step)
 
       # Save a checkpoint and evaluate the model periodically.
-      if (step + 1) % 10000 == 0 or (step + 1) == FLAGS.max_steps:
+      if (step + 1) % 1000 == 0 or (step + 1) == FLAGS.max_steps:
         saver.save(sess, FLAGS.train_dir, global_step=step)
         # Evaluate against the training set.
         print('Training Data Eval:')
